@@ -1,13 +1,13 @@
 # Relative Path Logger
 
-This simple logger creates a log file, `Output.txt`, containing the internal file structure of a folder. Just drag and drop onto the exe.
+This simple logger creates a log file, `Output.txt`, containing the internal file structure of a folder or file archive. Just drag and drop onto the exe.
 
 ## Output
 
 Its output will look something like this:
 
-```
-DroppedFoldername
+```text
+DroppedName
 |---file1.bin  -  26930132 bytes
 |---example.zip  -  3288792 bytes
 |---Media

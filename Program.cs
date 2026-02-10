@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpCompress.Readers;
+using System;
 using System.IO;
 using System.Text;
 
@@ -10,14 +11,50 @@ namespace RelativePathLogger
 		private const string NotChild = "|   ";
 		static void Main(string[] args)
 		{
-			if(args.Length != 1)
+			if (args.Length != 1)
 			{
 				Console.WriteLine("This program takes exactly one argument: a directory to log all subcontents.");
 				Console.ReadKey();
 				return;
 			}
 			string rootFolderPath = args[0];
-			if(rootFolderPath == null || !Directory.Exists(rootFolderPath))
+			if (string.IsNullOrWhiteSpace(rootFolderPath))
+			{
+				Console.WriteLine("Directory path cannot be empty");
+				Console.ReadKey();
+				return;
+			}
+			bool deleteDirectory;
+			if (Directory.Exists(rootFolderPath))
+			{
+				deleteDirectory = false;
+			}
+			else if (File.Exists(rootFolderPath))
+			{
+				// Assume the file is a compressed archive and try to extract it to a temporary directory
+				string? directoryName = Path.GetFileName(rootFolderPath);
+				if (string.IsNullOrWhiteSpace(directoryName))
+				{
+					directoryName = Guid.NewGuid().ToString();
+				}
+				string tempDirectory = Path.Join("temp", directoryName);
+				Directory.CreateDirectory(tempDirectory);
+				try
+				{
+					using var reader = ReaderFactory.Open(rootFolderPath);
+					reader.WriteAllToDirectory(tempDirectory);
+				}
+				catch (Exception e)
+				{
+					Console.WriteLine($"Failed to extract archive: {e}");
+					Console.ReadKey();
+					return;
+				}
+
+				deleteDirectory = true;
+				rootFolderPath = tempDirectory;
+			}
+			else
 			{
 				Console.WriteLine("Invalid directory");
 				Console.ReadKey();
@@ -34,7 +71,21 @@ namespace RelativePathLogger
 			{
 				Console.WriteLine(e);
 			}
-			
+			finally
+			{
+				if (deleteDirectory)
+				{
+					try
+					{
+						Directory.Delete(rootFolderPath, true);
+					}
+					catch (Exception e)
+					{
+						Console.WriteLine($"Failed to delete temporary directory: {e}");
+					}
+				}
+			}
+
 			Console.ReadKey();
 		}
 
