@@ -4,7 +4,7 @@ using System.Text;
 
 namespace RelativePathLogger
 {
-	class Program
+	internal static class Program
 	{
 		private const string Child = "|---";
 		private const string NotChild = "|   ";
@@ -23,14 +23,11 @@ namespace RelativePathLogger
 				Console.ReadKey();
 				return;
 			}
-			DirectoryInfo rootFolderInfo = new DirectoryInfo(rootFolderPath);
-			rootFolderPath = rootFolderInfo.FullName;
-			string rootFolderName = rootFolderInfo.Name;
 			string logFilePath = "Output.txt";
 			File.Create(logFilePath).Close();
 			try
 			{
-				ProcessDirectory(logFilePath, rootFolderInfo, -1);
+				ProcessDirectory(logFilePath, new DirectoryInfo(rootFolderPath), -1);
 				Console.WriteLine("Done");
 			}
 			catch(Exception e)
@@ -85,7 +82,7 @@ namespace RelativePathLogger
 
 		private static string GetString(FileInfo fileInfo, int depth)
 		{
-			if (depth < 0) throw new ArgumentException(nameof(depth));
+			ArgumentOutOfRangeException.ThrowIfNegative(depth);
 			StringBuilder builder = new();
 
 			if (depth == 0)
