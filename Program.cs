@@ -1,4 +1,5 @@
-﻿using SharpCompress.Readers;
+﻿using SharpCompress.Common;
+using SharpCompress.Readers;
 using System;
 using System.IO;
 using System.Text;
@@ -42,7 +43,11 @@ namespace RelativePathLogger
 				try
 				{
 					using var reader = ReaderFactory.Open(rootFolderPath);
-					reader.WriteAllToDirectory(tempDirectory);
+					reader.WriteAllToDirectory(tempDirectory, new ExtractionOptions()
+					{
+						ExtractFullPath = true,
+						Overwrite = true
+					});
 				}
 				catch (Exception e)
 				{
